@@ -173,6 +173,23 @@
                     .then(done).catch(done);
             });
 
+            it('should use node postProcess', function (done) {
+                function postProcess(original, clone) {
+                    if (original.classList && original.classList.contains('blue')){
+                        clone.style.backgroundColor = 'green';
+                    }
+                }
+
+                loadTestPage('postprocess/dom-node.html', 'postprocess/style.css', 'postprocess/control-image')
+                    .then(function () {
+                        return domtoimage.toPng(domNode(), {
+                            postProcess: postProcess
+                        });
+                    })
+                    .then(check)
+                    .then(done).catch(done);
+            });
+
             it('should render with external stylesheet', function (done) {
                 loadTestPage('sheet/dom-node.html', 'sheet/style.css', 'sheet/control-image')
                     .then(delay(1000))

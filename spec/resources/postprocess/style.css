@@ -1,0 +1,13 @@
+#dom-node {
+    width: 100px;
+}
+
+.blue {
+    height: 50px;
+    background-color: blue;
+}
+
+.red {
+    height: 50px;
+    background-color: red;
+}

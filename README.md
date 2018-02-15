@@ -122,6 +122,11 @@ for unit testing._
 
 ### Rendering options
 
+#### postProcess
+
+A function that receives both the original and the clone Element.
+Can be used to edit the elements directly.
+
 #### filter
 
 A function taking DOM node as argument. Should return true if passed node
