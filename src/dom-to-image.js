@@ -12,7 +12,7 @@
         imagePlaceholder: undefined,
         // Default cache bust is false, it will use the cache
         cacheBust: false,
-        manipulate: function(original, clone) {}
+        postProcess: function(original, clone) {}
     };
 
     var domtoimage = {
@@ -41,7 +41,7 @@
      * @param {Object} options - Rendering options
      * @param {Function} options.filter - Should return true if passed node should be included in the output
      *          (excluding node means excluding it's children as well). Not called on the root node.
-     * @param {Function} options.manipulate - receives both the original and the clone Element. Can be used to edit the elements directly
+     * @param {Function} options.postProcess - receives both the original and the clone Element. Can be used to edit the elements directly
      * @param {String} options.bgcolor - color for the background, any valid CSS color value.
      * @param {Number} options.width - width to be applied to node before rendering.
      * @param {Number} options.height - height to be applied to node before rendering.
@@ -57,7 +57,7 @@
         copyOptions(options);
         return Promise.resolve(node)
             .then(function (node) {
-                return cloneNode(node, options.filter, options.manipulate, true);
+                return cloneNode(node, options.filter, options.postProcess, true);
             })
             .then(embedFonts)
             .then(inlineImages)
@@ -176,7 +176,7 @@
         }
     }
 
-    function cloneNode(node, filter, manipulate, root) {
+    function cloneNode(node, filter, postProcess, root) {
         if (!root && filter && !filter(node)) return Promise.resolve();
 
         return Promise.resolve(node)
@@ -185,7 +185,7 @@
                 return cloneChildren(node, clone, filter);
             })
             .then(function (clone) {
-                return processClone(node, clone, manipulate);
+                return processClone(node, clone, postProcess);
             });
 
         function makeNodeCopy(node) {
@@ -207,7 +207,7 @@
                 children.forEach(function (child) {
                     done = done
                         .then(function () {
-                            return cloneNode(child, filter, manipulate);
+                            return cloneNode(child, filter, postProcess);
                         })
                         .then(function (childClone) {
                             if (childClone) parent.appendChild(childClone);
@@ -217,21 +217,21 @@
             }
         }
 
-        function processClone(original, clone, manipulate) {
+        function processClone(original, clone, postProcess) {
             if (!(clone instanceof Element)) return clone;
 
             return Promise.resolve()
                 .then(cloneStyle)
                 .then(clonePseudoElements)
                 .then(copyUserInput)
-                .then(manipulateElements)
+                .then(postProcessElements)
                 .then(fixSvg)
                 .then(function () {
                     return clone;
                 });
 
-            function manipulateElements() {
-                manipulate(original, clone);
+            function postProcessElements() {
+                postProcess(original, clone);
             }
 
             function cloneStyle() {
