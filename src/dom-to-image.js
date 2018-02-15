@@ -29,11 +29,13 @@
         }
     };
 
-    if (typeof module !== 'undefined')
+    if (typeof(exports) !== "undefined") { // nodejs
         module.exports = domtoimage;
-    else
-        global.domtoimage = domtoimage;
-
+    } else if (typeof(define) !== "undefined") { // amd
+        define(domtoimage);
+    } else { // define global variable
+        global.domtoimage = domtoimage
+    }
 
     /**
      * @param {Node} node - The DOM Node object to render
