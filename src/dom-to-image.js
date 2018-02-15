@@ -182,13 +182,10 @@
         return Promise.resolve(node)
             .then(makeNodeCopy)
             .then(function (clone) {
-                return manipulate(node, clone);
-            })
-            .then(function (clone) {
                 return cloneChildren(node, clone, filter);
             })
             .then(function (clone) {
-                return processClone(node, clone);
+                return processClone(node, clone, manipulate);
             });
 
         function makeNodeCopy(node) {
@@ -220,17 +217,22 @@
             }
         }
 
-        function processClone(original, clone) {
+        function processClone(original, clone, manipulate) {
             if (!(clone instanceof Element)) return clone;
 
             return Promise.resolve()
                 .then(cloneStyle)
                 .then(clonePseudoElements)
                 .then(copyUserInput)
+                .then(manipulateElements)
                 .then(fixSvg)
                 .then(function () {
                     return clone;
                 });
+
+            function manipulateElements() {
+                manipulate(original, clone);
+            }
 
             function cloneStyle() {
                 copyStyle(window.getComputedStyle(original), clone.style);
