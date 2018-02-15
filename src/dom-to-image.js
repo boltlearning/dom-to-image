@@ -11,8 +11,7 @@
         // Default is to fail on error, no placeholder
         imagePlaceholder: undefined,
         // Default cache bust is false, it will use the cache
-        cacheBust: false,
-        postProcess: function(original, clone) {}
+        cacheBust: false
     };
 
     var domtoimage = {
@@ -231,7 +230,9 @@
                 });
 
             function postProcessElements() {
-                postProcess(original, clone);
+                if (postProcess) {
+                    postProcess(original, clone);
+                }
             }
 
             function cloneStyle() {
