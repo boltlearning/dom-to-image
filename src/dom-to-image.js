@@ -11,7 +11,8 @@
         // Default is to fail on error, no placeholder
         imagePlaceholder: undefined,
         // Default cache bust is false, it will use the cache
-        cacheBust: false
+        cacheBust: false,
+        manipulate: function(original, clone) {}
     };
 
     var domtoimage = {
@@ -40,6 +41,7 @@
      * @param {Object} options - Rendering options
      * @param {Function} options.filter - Should return true if passed node should be included in the output
      *          (excluding node means excluding it's children as well). Not called on the root node.
+     * @param {Function} options.manipulate - receives both the original and the clone Element. Can be used to edit the elements directly
      * @param {String} options.bgcolor - color for the background, any valid CSS color value.
      * @param {Number} options.width - width to be applied to node before rendering.
      * @param {Number} options.height - height to be applied to node before rendering.
@@ -55,7 +57,7 @@
         copyOptions(options);
         return Promise.resolve(node)
             .then(function (node) {
-                return cloneNode(node, options.filter, true);
+                return cloneNode(node, options.filter, options.manipulate, true);
             })
             .then(embedFonts)
             .then(inlineImages)
@@ -174,11 +176,14 @@
         }
     }
 
-    function cloneNode(node, filter, root) {
+    function cloneNode(node, filter, manipulate, root) {
         if (!root && filter && !filter(node)) return Promise.resolve();
 
         return Promise.resolve(node)
             .then(makeNodeCopy)
+            .then(function (clone) {
+                return manipulate(node, clone);
+            })
             .then(function (clone) {
                 return cloneChildren(node, clone, filter);
             })
@@ -205,7 +210,7 @@
                 children.forEach(function (child) {
                     done = done
                         .then(function () {
-                            return cloneNode(child, filter);
+                            return cloneNode(child, filter, manipulate);
                         })
                         .then(function (childClone) {
                             if (childClone) parent.appendChild(childClone);
