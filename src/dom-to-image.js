@@ -32,7 +32,9 @@
     if (typeof(exports) !== "undefined") { // nodejs
         module.exports = domtoimage;
     } else if (typeof(define) !== "undefined") { // amd
-        define(domtoimage);
+        define([], function() {
+            return domtoimage;
+        });
     } else { // define global variable
         global.domtoimage = domtoimage
     }
